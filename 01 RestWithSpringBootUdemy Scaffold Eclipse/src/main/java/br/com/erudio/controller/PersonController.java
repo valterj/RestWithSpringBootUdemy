@@ -1,9 +1,11 @@
 package br.com.erudio.controller;
 
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,14 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.erudio.data.vo.PersonVO;
 import br.com.erudio.services.PersonService;
 
 @RestController
-@RequestMapping("/person")
+@RequestMapping("api/person/v1")
 public class PersonController {
 
 	@Autowired
@@ -26,22 +27,33 @@ public class PersonController {
 
 	@GetMapping
 	public List<PersonVO> findAll() {
-		return this.service.findAll();
+		List<PersonVO> persons = this.service.findAll();
+		persons.stream()				
+				.forEach(p -> p.add(linkTo(methodOn(PersonController.class).findById(p.getKey())).withSelfRel()));
+		return persons;
 	}
 
-	@GetMapping("/{id}")
+	@GetMapping(value = "/{id}", produces = { "application/json", "application/xml" })
 	public PersonVO findById(@PathVariable("id") Long id) {
-		return this.service.findById(id);
+		PersonVO personVO = this.service.findById(id);
+		personVO.add(linkTo(methodOn(PersonController.class).findById(id)).withSelfRel());
+		return personVO;
 	}
 
-	@PostMapping
+	@PostMapping(produces = { "application/json", "application/xml" }, consumes = { "application/json",
+			"application/xml" })
 	public PersonVO create(@RequestBody PersonVO person) {
-		return this.service.create(person);
+		PersonVO personVO = this.service.create(person);
+		personVO.add(linkTo(methodOn(PersonController.class).findById(personVO.getKey())).withSelfRel());
+		return personVO;
 	}
 
-	@PutMapping
+	@PutMapping(produces = { "application/json", "application/xml" }, consumes = { "application/json",
+			"application/xml" })
 	public PersonVO update(@RequestBody PersonVO person) {
-		return this.service.update(person);
+		PersonVO personVO = this.service.update(person);
+		personVO.add(linkTo(methodOn(PersonController.class).findById(personVO.getKey())).withSelfRel());
+		return personVO;
 	}
 
 	@DeleteMapping("/{id}")
