@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.erudio.data.vo.PersonVO;
 import br.com.erudio.services.PersonService;
+import io.swagger.annotations.Api;
 
+@Api(tags = "API de pessoas")
 @RestController
 @RequestMapping("api/person/v1")
 public class PersonController {
