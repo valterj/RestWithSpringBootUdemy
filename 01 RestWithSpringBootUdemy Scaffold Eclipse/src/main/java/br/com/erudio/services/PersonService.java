@@ -3,6 +3,7 @@ package br.com.erudio.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.erudio.converter.DozerConverter;
@@ -42,8 +43,10 @@ public class PersonService {
 		return DozerConverter.parseObject(entity, PersonVO.class);
 	}
 
-	public List<PersonVO> findAll() {
-		return DozerConverter.parseListObjects(repository.findAll(), PersonVO.class);
+	public List<PersonVO> findAll(Pageable pageable) {
+		var entities = repository.findAll(pageable).getContent();
+		
+		return DozerConverter.parseListObjects(entities, PersonVO.class);
 	}
 
 	public void delete(Long id) {
